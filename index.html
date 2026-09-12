@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="id" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="google" content="notranslate">
+    <meta name="robots" content="noindex">
+    <title>CSCA Matematika Interaktif 🚀</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7; --secondary: #a29bfe; --success: #00b894;
+            --danger: #ff7675; --warning: #fdcb6e; --info: #0984e3;
+            --bg-gradient: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+            --card-bg: rgba(255, 255, 255, 0.97); --text-dark: #2d3436; --text-light: #636e72;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+            -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-gradient); min-height: 100vh; display: flex; color: var(--text-dark); overflow-x: hidden; }
+        
+        .sidebar { width: 280px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 20px; display: flex; flex-direction: column; gap: 12px; border-right: 1px solid rgba(255,255,255,0.3); box-shadow: 5px 0 25px rgba(0,0,0,0.08); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+        .sidebar h2 { color: white; text-align: center; font-size: 1.4rem; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .module-btn { padding: 14px; border: none; border-radius: 15px; background: white; color: var(--primary); font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: left; display: flex; align-items: center; gap: 10px; }
+        .module-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2); background: var(--primary); color: white; }
+        .module-btn.active { background: linear-gradient(135deg, var(--primary), #8e78ff); color: white; transform: scale(1.02); box-shadow: 0 10px 20px rgba(108, 92, 231, 0.4); }
+        .module-icon { font-size: 1.4rem; }
+
+        .main-content { flex: 1; padding: 25px; display: flex; flex-direction: column; align-items: center; }
+        .header-info { width: 100%; max-width: 850px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: white; font-weight: bold; font-size: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.2); flex-wrap: wrap; gap: 10px; }
+        .timer-display { background: rgba(255,255,255,0.25); padding: 8px 16px; border-radius: 20px; font-size: 1.1rem; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 8px; }
+        .timer-display.warning { background: var(--warning); color: var(--text-dark); animation: pulse 1s infinite; }
+        .timer-display.danger { background: var(--danger); color: white; animation: pulse 0.5s infinite; }
+        
+        .progress-bar-container { width: 100%; max-width: 850px; height: 10px; background: rgba(255,255,255,0.4); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #00b894, #00cec9); width: 0%; transition: width 0.5s ease; border-radius: 10px; }
+        
+        .question-card { background: var(--card-bg); width: 100%; max-width: 850px; padding: 30px; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.12); animation: slideIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; overflow: hidden; }
+        .question-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--primary), #fd79a8, #fdcb6e, #00b894); }
+        .question-text { font-size: 1.2rem; line-height: 1.8; margin-bottom: 10px; color: var(--text-dark); }
+        .question-translation { font-size: 0.95rem; color: var(--text-light); margin-bottom: 25px; font-style: italic; border-left: 3px solid var(--secondary); padding-left: 15px; }
+        
+        .options-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .option-btn { padding: 14px 18px; border: 2px solid #dfe6e9; border-radius: 15px; background: white; font-size: 1rem; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 10px; font-weight: 500; text-align: left; }
+        .option-btn:hover:not(:disabled) { border-color: var(--primary); background: #f8f9fa; transform: translateY(-2px); }
+        .option-btn.correct { background: var(--success); color: white; border-color: var(--success); animation: pulse 0.5s; }
+        .option-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); animation: shake 0.5s; }
+        .option-label { width: 30px; height: 30px; min-width: 30px; border-radius: 50%; background: #f1f2f6; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); }
+        .option-btn.correct .option-label, .option-btn.wrong .option-label { background: rgba(255,255,255,0.3); color: white; }
+
+        .explanation-box { margin-top: 20px; padding: 20px; border-radius: 15px; background: linear-gradient(135deg, #f5f7ff 0%, #fef9f3 100%); border-left: 5px solid var(--info); display: none; animation: fadeIn 0.5s; }
+        .explanation-box.show { display: block; }
+        .explanation-title { font-weight: bold; color: var(--info); font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .explanation-content { line-height: 1.8; color: var(--text-dark); font-size: 0.98rem; }
+        .explanation-content ol { padding-left: 20px; margin-top: 8px; }
+        .explanation-content li { margin-bottom: 8px; }
+        .explanation-content .keyword { background: #fff3cd; padding: 2px 6px; border-radius: 4px; font-weight: 600; color: #856404; }
+        .explanation-content .formula { background: #e7f3ff; padding: 8px 12px; border-radius: 8px; display: inline-block; margin: 5px 0; font-family: 'Courier New', monospace; }
+
+        .next-btn { width: 100%; padding: 15px; border: none; border-radius: 15px; background: linear-gradient(135deg, var(--primary), #8e78ff); color: white; font-size: 1.15rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3); display: none; margin-top: 15px; }
+        .next-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(108, 92, 231, 0.5); }
+        .next-btn.show { display: block; animation: fadeIn 0.5s; }
+
+        .welcome-screen { text-align: center; color: white; margin-top: 80px; padding: 20px; }
+        .welcome-screen h1 { font-size: 2.5rem; margin-bottom: 20px; text-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .welcome-screen p { font-size: 1.1rem; opacity: 0.95; line-height: 1.8; }
+        .welcome-screen .info-box { background: rgba(255,255,255,0.2); padding: 20px; border-radius: 15px; margin-top: 20px; backdrop-filter: blur(10px); text-align: left; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .welcome-screen .info-box ul { list-style: none; padding: 0; }
+        .welcome-screen .info-box li { padding: 8px 0; display: flex; align-items: center; gap: 10px; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+        
+        .confetti { position: fixed; width: 10px; height: 10px; top: -10px; z-index: 9999; animation: fall 3s linear forwards; pointer-events: none; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; max-width: 400px; text-align: center; animation: slideIn 0.3s; }
+        .modal-content h2 { color: var(--primary); margin-bottom: 15px; }
+        .modal-content p { margin-bottom: 20px; color: var(--text-dark); }
+        .modal-btn { padding: 12px 30px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; font-size: 1rem; }
+
+        @media print { body * { visibility: hidden; } .question-card, .question-card * { visibility: hidden; } }
+        
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 10px; height: auto; position: relative; gap: 8px; }
+            .sidebar h2 { display: none; }
+            .module-btn { white-space: nowrap; font-size: 0.8rem; padding: 10px; min-width: fit-content; }
+            .options-container { grid-template-columns: 1fr; }
+            .question-card { padding: 20px; }
+            .question-text { font-size: 1.05rem; }
+            .welcome-screen h1 { font-size: 1.8rem; }
+            .header-info { font-size: 0.9rem; }
+            .timer-display { font-size: 0.95rem; padding: 6px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2>📚 CSCA Math by lcnpalembang-08994477998</h2>
+        <button class="module-btn" data-module="1"><span class="module-icon">📐</span> Modul 1: Himpunan</button>
+        <button class="module-btn" data-module="2"><span class="module-icon">📈</span> Modul 2: Fungsi</button>
+        <button class="module-btn" data-module="3"><span class="module-icon">📏</span> Modul 3: Vektor</button>
+        <button class="module-btn" data-module="4"><span class="module-icon">🎲</span> Modul 4: Probabilitas</button>
+    </aside>
+
+    <main class="main-content">
+        <div class="welcome-screen" id="welcomeScreen">
+            <h1>Selamat Datang! 🌟</h1>
+            <p>Pilih modul di sebelah kiri untuk memulai latihan.</p>
+            <div class="info-box">
+                <ul>
+                    <li>⏱️ Waktu: 60 menit per modul</li>
+                    <li>📝 Total: 48 soal unik per modul</li>
+                    <li>💡 Pembahasan lengkap tersedia</li>
+                    <li>🌐 Bilingual: Hanzi & Indonesia</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="quizArea" style="display: none; width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="header-info">
+                <span id="scoreDisplay">⭐ Skor: 0</span>
+                <div class="timer-display" id="timerDisplay">⏱️ 60:00</div>
+                <span id="progressDisplay">Soal: 1 / 48</span>
+            </div>
+            <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+            
+            <div class="question-card" id="questionCard">
+                <div class="question-text" id="questionText"></div>
+                <div class="question-translation" id="questionTranslation"></div>
+                <div class="options-container" id="optionsContainer"></div>
+                <div class="explanation-box" id="explanationBox">
+                    <div class="explanation-title">💡 Pembahasan Lengkap</div>
+                    <div class="explanation-content" id="explanationContent"></div>
+                </div>
+                <button class="next-btn" id="nextBtn">Soal Selanjutnya ➔</button>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h2 id="modalTitle">⚠️ Peringatan</h2>
+            <p id="modalMessage">Aksi tidak diizinkan.</p>
+            <button class="modal-btn" onclick="document.getElementById('modalOverlay').classList.remove('show')">Mengerti</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // ANTI-CHEATING PROTECTION
+        // ==========================================
+        document.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            showModal('⚠️ Dilarang', 'Klik kanan tidak diizinkan pada aplikasi ini.');
+        });
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('cut', e => e.preventDefault());
+        document.addEventListener('paste', e => e.preventDefault());
+        document.addEventListener('selectstart', e => e.preventDefault());
+        document.addEventListener('dragstart', e => e.preventDefault());
+        
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12') { e.preventDefault(); showModal('⚠️ Dilarang', 'Developer tools tidak dapat diakses.'); }
+            if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) { e.preventDefault(); showModal('⚠️ Dilarang', 'Akses developer tools tidak diizinkan.'); }
+            if (e.ctrlKey && e.key.toUpperCase() === 'U') { e.preventDefault(); showModal('⚠️ Dilarang', 'View source tidak diizinkan.'); }
+            if (e.ctrlKey && e.key.toUpperCase() === 'S') { e.preventDefault(); showModal('⚠️ Dilarang', 'Menyimpan halaman tidak diizinkan.'); }
+            if (e.ctrlKey && e.key.toUpperCase() === 'P') { e.preventDefault(); showModal('⚠️ Dilarang', 'Mencetak halaman tidak diizinkan.'); }
+            if (e.ctrlKey && e.key.toUpperCase() === 'A') { e.preventDefault(); }
+            if (e.key === 'PrintScreen') { e.preventDefault(); showModal('⚠️ Dilarang', 'Screenshot tidak diizinkan.'); }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && currentModule) {
+                console.log('Tab tersembunyi terdeteksi');
+            }
+        });
+
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        // ==========================================
+        // UTILITIES
+        // ==========================================
+        function factorial(n) { return n <= 1 ? 1 : n * factorial(n - 1); }
+        function comb(n, k) { return factorial(n) / (factorial(k) * factorial(n - k)); }
+        function perm(n, k) { return factorial(n) / factorial(n - k); }
+        function gcd(a, b) { return b === 0 ? Math.abs(a) : gcd(b, a % b); }
+        
+        function shuffle(arr) {
+            let a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function numOpts(correct) {
+            let s = new Set([correct]);
+            let attempts = 0;
+            while(s.size < 4 && attempts < 50) { 
+                let o = correct + Math.floor(Math.random() * 7) - 3; 
+                if(o !== correct) s.add(o); 
+                attempts++;
+            }
+            while(s.size < 4) s.add(correct + s.size);
+            return shuffle(Array.from(s));
+        }
+
+        function intervalOpts(correctStr, a, b) {
+            let s = new Set([correctStr]);
+            let dist = [
+                `{x | ${a-1} < x < ${b+1}}`, `{x | ${a} \\le x \\le ${b}}`, 
+                `{x | x < ${a} \\text{ 或 } x > ${b}}`, `{x | ${a+1} < x < ${b-1}}`
+            ];
+            dist.forEach(d => { if(s.size < 4) s.add(d); });
+            return shuffle(Array.from(s));
+        }
+
+        function fracOpts(n, d) {
+            let g = gcd(Math.abs(n), Math.abs(d));
+            let cn = n/g, cd = d/g;
+            if(cd < 0) { cn = -cn; cd = -cd; }
+            let correct = `\\frac{${cn}}{${cd}}`;
+            let s = new Set([correct]);
+            let dist = [`\\frac{${cd}}{${cn}}`, `\\frac{${-cn}}{${cd}}`, `\\frac{${cn+1}}{${cd}}`, `\\frac{${cn}}{${cd+1}}`];
+            dist.forEach(x => { if(s.size < 4) s.add(x); });
+            return shuffle(Array.from(s));
+        }
+
+        function renderMath() {
+            renderMathInElement(document.body, {
+                delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}],
+                throwOnError: false
+            });
+        }
+
+        // ==========================================
+        // TIMER (60 MINUTES)
+        // ==========================================
+        let timeLeft = 60 * 60;
+        let timerInterval;
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        function startTimer() {
+            timeLeft = 60 * 60;
+            updateTimerDisplay();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showModal('⏰ Waktu Habis!', 'Waktu pengerjaan telah berakhir. Sistem akan menampilkan hasil Anda.');
+                    setTimeout(() => showCompletion(true), 1500);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            let min = Math.floor(timeLeft / 60);
+            let sec = timeLeft % 60;
+            timerDisplay.textContent = `⏱️ ${min}:${sec.toString().padStart(2, '0')}`;
+            timerDisplay.classList.remove('warning', 'danger');
+            if (timeLeft <= 300) timerDisplay.classList.add('danger');
+            else if (timeLeft <= 600) timerDisplay.classList.add('warning');
+        }
+
+        // ==========================================
+        // MODULE 1: HIMPUNAN & PERTIDAKSAMAAN
+        // ==========================================
+        function genMod1() {
+            let qs = [];
+            
+            // Q1: Soal Khusus Hanzi
+            qs.push({ 
+                cn: `已知集合 $A = \\{x \\mid x^2 - 3x - 10 \\le 0\\}$ 和集合 $B = \\{x \\mid 2x - 4 > 0\\}$，求 $A \\cap B$。`, 
+                id: `Diketahui $A = \\{x \\mid x^2 - 3x - 10 \\le 0\\}$ dan $B = \\{x \\mid 2x - 4 > 0\\}$, tentukan $A \\cap B$.`, 
+                ans: `{x | 2 < x \\le 5}`, 
+                opts: intervalOpts(`{x | 2 < x \\le 5}`, 2, 5),
+                exp: `<ol>
+                    <li><span class="keyword">Langkah 1:</span> Selesaikan himpunan A. Faktorkan $x^2 - 3x - 10 = (x-5)(x+2) \\le 0$, sehingga didapat $-2 \\le x \\le 5$.</li>
+                    <li><span class="keyword">Langkah 2:</span> Selesaikan himpunan B. $2x - 4 > 0 \\implies x > 2$.</li>
+                    <li><span class="keyword">Langkah 3:</span> Cari irisan $A \\cap B$, yaitu nilai x yang memenuhi kedua kondisi: $-2 \\le x \\le 5$ DAN $x > 2$. Hasilnya: $2 < x \\le 5$.</li>
+                </ol>`
+            });
+
+            // Q2-12: Operasi Himpunan
+            const sets = [[-2, 3], [1, 5], [-1, 4], [0, 6], [-3, 2], [2, 7], [-4, 1], [1, 3], [0, 5], [-2, 4], [3, 8]];
+            sets.forEach((p, i) => {
+                let a = p[0], b = p[1];
+                if(i % 3 === 0) {
+                    qs.push({ 
+                        cn: `已知 $A = \\{x \\mid x > ${a}\\}$， $B = \\{x \\mid x \\le ${b}\\}$，求 $A \\cap B$。`, 
+                        id: `Diketahui $A = \\{x \\mid x > ${a}\\}$ dan $B = \\{x \\mid x \\le ${b}\\}$, tentukan $A \\cap B$.`, 
+                        ans: `{x | ${a} < x \\le ${b}}`, 
+                        opts: intervalOpts(`{x | ${a} < x \\le ${b}}`, a, b),
+                        exp: `<ol>
+                            <li><span class="keyword">Konsep Irisan:</span> $A \\cap B$ adalah himpunan nilai x yang menjadi anggota A <b>sekaligus</b> anggota B.</li>
+                            <li><span class="keyword">Syarat A:</span> $x > ${a}$ (lebih besar dari ${a}).</li>
+                            <li><span class="keyword">Syarat B:</span> $x \\le ${b}$ (lebih kecil atau sama dengan ${b}).</li>
+                            <li><span class="keyword">Gabungkan:</span> Nilai x harus memenuhi keduanya, sehingga ${a} < x \\le ${b}.</li>
+                        </ol>`
+                    });
+                } else if(i % 3 === 1) {
+                    qs.push({ 
+                        cn: `已知 $A = \\{x \\mid x < ${a}\\}$， $B = \\{x \\mid x > ${b}\\}$，求 $A \\cup B$。`, 
+                        id: `Diketahui $A = \\{x \\mid x < ${a}\\}$ dan $B = \\{x \\mid x > ${b}\\}$, tentukan $A \\cup B$.`, 
+                        ans: `{x | x < ${a} \\text{ 或 } x > ${b}}`, 
+                        opts: intervalOpts(`{x | x < ${a} \\text{ 或 } x > ${b}}`, a, b),
+                        exp: `<ol>
+                            <li><span class="keyword">Konsep Gabungan:</span> $A \\cup B$ adalah himpunan nilai x yang menjadi anggota A <b>atau</b> anggota B (salah satu saja cukup).</li>
+                            <li><span class="keyword">Himpunan A:</span> Semua x yang kurang dari ${a}.</li>
+                            <li><span class="keyword">Himpunan B:</span> Semua x yang lebih dari ${b}.</li>
+                            <li><span class="keyword">Hasil:</span> Gabungannya adalah $x < ${a}$ atau $x > ${b}$.</li>
+                        </ol>`
+                    });
+                } else {
+                    qs.push({ 
+                        cn: `全集 $U = \\mathbb{R}$， $A = \\{x \\mid x > ${a}\\}$，求 $\\complement_U A$。`, 
+                        id: `Semesta $U = \\mathbb{R}$, $A = \\{x \\mid x > ${a}\\}$, tentukan komplemen A.`, 
+                        ans: `{x | x \\le ${a}}`, 
+                        opts: intervalOpts(`{x | x \\le ${a}}`, -99, a),
+                        exp: `<ol>
+                            <li><span class="keyword">Konsep Komplemen:</span> Komplemen A ($\\complement_U A$) adalah himpunan semua anggota semesta yang <b>bukan</b> anggota A.</li>
+                            <li><span class="keyword">Diketahui:</span> $A = \\{x \\mid x > ${a}\\}$, yaitu semua bilangan real lebih dari ${a}.</li>
+                            <li><span class="keyword">Komplemennya:</span> Kebalikan dari "lebih dari ${a}" adalah "kurang dari atau sama dengan ${a}", yaitu $x \\le ${a}$.</li>
+                        </ol>`
+                    });
+                }
+            });
+
+            // Q13-24: Pertidaksamaan Kuadrat
+            const roots = [[-2, 3], [1, 4], [-1, 5], [0, 6], [-3, 2], [-4, 1], [2, 5], [-1, 2], [3, 7], [-2, 4], [1, 6], [-3, 5]];
+            roots.forEach(r => {
+                let a = r[0], b = r[1];
+                let sum = a + b, prod = a * b;
+                let sign = Math.random() > 0.5 ? '<' : '>';
+                let ans = sign === '<' ? `{x | ${a} < x < ${b}}` : `{x | x < ${a} \\text{ 或 } x > ${b}}`;
+                qs.push({ 
+                    cn: `求不等式 $x^2 - ${sum}x + ${prod} ${sign} 0$ 的解集。`, 
+                    id: `Tentukan himpunan penyelesaian dari $x^2 - ${sum}x + ${prod} ${sign} 0$.`, 
+                    ans: ans, 
+                    opts: intervalOpts(ans, a, b),
+                    exp: `<ol>
+                        <li><span class="keyword">Langkah 1:</span> Faktorkan $x^2 - ${sum}x + ${prod} = (x - ${a})(x - ${b})$.</li>
+                        <li><span class="keyword">Langkah 2:</span> Pembuat nol: $x = ${a}$ atau $x = ${b}$.</li>
+                        <li><span class="keyword">Langkah 3:</span> Karena koefisien $x^2$ positif (${1 > 0 ? '+' : '-'}), grafik parabola terbuka ke atas. 
+                            ${sign === '<' ? `Untuk $< 0$, nilai x berada di antara akar: ${a} < x < ${b}.` : `Untuk $> 0$, nilai x berada di luar akar: x < ${a} atau x > ${b}.`}</li>
+                    </ol>`
+                });
+            });
+
+            // Q25-36: Pertidaksamaan Rasional
+            const fracP = [[1, 3], [-2, 4], [0, 5], [-1, 2], [3, -1], [2, 6], [-3, 1], [4, -2], [1, -4], [5, 2], [-2, -5], [3, 7]];
+            fracP.forEach(p => {
+                let a = p[0], b = p[1];
+                let min = Math.min(a, b), max = Math.max(a, b);
+                let ans = `{x | x < ${min} \\text{ 或 } x > ${max}}`;
+                qs.push({ 
+                    cn: `求不等式 $\\frac{x - ${a}}{x - ${b}} > 0$ 的解集。`, 
+                    id: `Tentukan himpunan penyelesaian dari $\\frac{x - ${a}}{x - ${b}} > 0$.`, 
+                    ans: ans, 
+                    opts: intervalOpts(ans, min, max),
+                    exp: `<ol>
+                        <li><span class="keyword">Pembuat Nol Pembilang:</span> $x - ${a} = 0 \\implies x = ${a}$.</li>
+                        <li><span class="keyword">Pembuat Nol Penyebut:</span> $x - ${b} = 0 \\implies x = ${b}$ (nilai ini <b>tidak boleh</b> dimasukkan karena penyebut tidak boleh nol).</li>
+                        <li><span class="keyword">Garis Bilangan:</span> Buat garis bilangan dengan titik ${min} dan ${max}. Uji tanda pada setiap interval.</li>
+                        <li><span class="keyword">Hasil:</span> Karena pertidaksamaan $> 0$, ambil interval yang bertanda positif: $x < ${min}$ atau $x > ${max}$.</li>
+                    </ol>`
+                });
+            });
+
+            // Q37-48: Nilai Mutlak
+            const absP = [[2, 3], [-1, 4], [3, 2], [0, 5], [-2, 3], [4, 1], [-3, 4], [1, 2], [5, 3], [-4, 5], [2, 4], [-1, 3]];
+            absP.forEach(p => {
+                let a = p[0], b = p[1];
+                let min = a - b, max = a + b;
+                let ans = `{x | ${min} < x < ${max}}`;
+                qs.push({ 
+                    cn: `求不等式 $|x - ${a}| < ${b}$ 的解集。`, 
+                    id: `Tentukan himpunan penyelesaian dari $|x - ${a}| < ${b}$.`, 
+                    ans: ans, 
+                    opts: intervalOpts(ans, min, max),
+                    exp: `<ol>
+                        <li><span class="keyword">Definisi Nilai Mutlak:</span> $|x - a| < b$ berarti jarak x dari a kurang dari b.</li>
+                        <li><span class="keyword">Ubah ke Pertidaksamaan Ganda:</span> $-b < x - ${a} < b$.</li>
+                        <li><span class="keyword">Tambahkan ${a} ke semua ruas:</span> $${a} - ${b} < x < ${a} + ${b}$, yaitu $${min} < x < ${max}$.</li>
+                        <li><span class="keyword">Arti Geometris:</span> Semua titik x yang berjarak kurang dari ${b} satuan dari titik ${a}.</li>
+                    </ol>`
+                });
+            });
+            return qs;
+        }
+
+        // ==========================================
+        // MODULE 2: FUNGSI
+        // ==========================================
+        function genMod2() {
+            let qs = [];
+            
+            // Q1: Soal Khusus Hanzi
+            qs.push({ 
+                cn: `已知函数 $f(x) = \\frac{2x+1}{x-1}$ ($x \\neq 1$)，求其反函数 $f^{-1}(x)$。`, 
+                id: `Diketahui $f(x) = \\frac{2x+1}{x-1}$ ($x \\neq 1$), tentukan fungsi invers $f^{-1}(x)$.`, 
+                ans: `f^{-1}(x) = \\frac{x+1}{x-2}`, 
+                opts: shuffle([`f^{-1}(x) = \\frac{x+1}{x-2}`, `f^{-1}(x) = \\frac{x-1}{x-2}`, `f^{-1}(x) = \\frac{x+1}{x+2}`, `f^{-1}(x) = \\frac{2x+1}{x+1}`]),
+                exp: `<ol>
+                    <li><span class="keyword">Langkah 1:</span> Misalkan $y = \\frac{2x+1}{x-1}$.</li>
+                    <li><span class="keyword">Langkah 2:</span> Kalikan silang: $y(x-1) = 2x+1 \\implies xy - y = 2x + 1$.</li>
+                    <li><span class="keyword">Langkah 3:</span> Kumpulkan suku x: $xy - 2x = y + 1 \\implies x(y-2) = y+1$.</li>
+                    <li><span class="keyword">Langkah 4:</span> Dapatkan $x = \\frac{y+1}{y-2}$. Ganti y dengan x: $f^{-1}(x) = \\frac{x+1}{x-2}$.</li>
+                </ol>`
+            });
+
+            // Q2-12: Domain Fungsi
+            const domP = [[2, -3], [1, 4], [3, -2], [4, 1], [-1, 5], [2, -4], [3, 1], [-2, 6], [4, -3], [1, 2], [5, -1], [2, 3]];
+            domP.forEach(p => {
+                let a = p[0], b = p[1];
+                let ans = `{x | x \\ge ${a}}`;
+                qs.push({ 
+                    cn: `求函数 $f(x) = \\sqrt{x - ${a}} + ${b}$ 的定义域。`, 
+                    id: `Tentukan domain dari $f(x) = \\sqrt{x - ${a}} + ${b}$.`, 
+                    ans: ans, 
+                    opts: intervalOpts(ans, a, 99),
+                    exp: `<ol>
+                        <li><span class="keyword">Syarat Domain Akar:</span> Bentuk $\\sqrt{g(x)}$ terdefinisi jika $g(x) \\ge 0$ (isi akar tidak boleh negatif).</li>
+                        <li><span class="keyword">Terapkan:</span> $x - ${a} \\ge 0 \\implies x \\ge ${a}$.</li>
+                        <li><span class="keyword">Catatan:</span> Konstanta $+ ${b}$ tidak mempengaruhi domain karena selalu terdefinisi.</li>
+                        <li><span class="keyword">Hasil:</span> Domain = $\\{x \\mid x \\ge ${a}\\}$.</li>
+                    </ol>`
+                });
+            });
+
+            // Q13-24: Komposisi Fungsi
+            const compP = [[2, 1, 3, -1], [3, 2, 1, 4], [1, 3, 2, -2], [4, 1, 3, 1], [2, 3, 1, -3], [3, 1, 2, 2], [1, 4, 3, -1], [4, 2, 1, 3], [2, 1, 4, -2], [3, 3, 2, 1], [1, 2, 3, -4], [4, 1, 2, 2]];
+            compP.forEach(p => {
+                let a=p[0], b=p[1], c=p[2], d=p[3];
+                let resA = a*c, resB = a*d + b;
+                let ans = `${resA}x + ${resB}`;
+                qs.push({ 
+                    cn: `已知 $f(x) = ${a}x + ${b}$， $g(x) = ${c}x + ${d}$，求 $f(g(x))$。`, 
+                    id: `Diketahui $f(x) = ${a}x + ${b}$ dan $g(x) = ${c}x + ${d}$, tentukan $f(g(x))$.`, 
+                    ans: ans, 
+                    opts: shuffle([ans, `${a*c}x + ${b+d}`, `${a+c}x + ${b*d}`, `${resA}x - ${resB}`]),
+                    exp: `<ol>
+                        <li><span class="keyword">Konsep Komposisi:</span> $f(g(x))$ berarti substitusi seluruh $g(x)$ ke dalam $f$.</li>
+                        <li><span class="keyword">Substitusi:</span> $f(g(x)) = ${a}(g(x)) + ${b} = ${a}(${c}x + ${d}) + ${b}$.</li>
+                        <li><span class="keyword">Distribusi:</span> $= ${a*c}x + ${a*d} + ${b} = ${resA}x + ${resB}$.</li>
+                        <li><span class="keyword">Catatan:</span> Komposisi fungsi TIDAK sama dengan perkalian fungsi. $f(g(x)) \\neq f(x) \\cdot g(x)$.</li>
+                    </ol>`
+                });
+            });
+
+            // Q25-36: Invers Fungsi
+            const invP = [[2, 1, 1, -1], [3, 2, 1, -2], [1, 4, 2, -1], [4, 3, 1, -3], [2, 5, 1, -2], [3, 1, 2, -1], [5, 2, 1, -4], [1, 3, 3, -1], [4, 1, 2, -3], [2, 2, 1, -1], [3, 4, 1, -2], [5, 1, 2, -2]];
+            invP.forEach(p => {
+                let a=p[0], b=p[1], c=p[2], d=p[3];
+                let n1 = -d, n2 = b, d1 = c, d2 = -a;
+                let ans = `\\frac{${n1}x + ${n2}}{${d1}x + ${d2}}`;
+                qs.push({ 
+                    cn: `求函数 $f(x) = \\frac{${a}x + ${b}}{${c}x + ${d}}$ 的反函数。`, 
+                    id: `Tentukan invers dari $f(x) = \\frac{${a}x + ${b}}{${c}x + ${d}}$.`, 
+                    ans: ans, 
+                    opts: shuffle([ans, `\\frac{${d}x + ${b}}{${c}x + ${a}}`, `\\frac{${n1}x - ${n2}}{${d1}x + ${d2}}`, `\\frac{${n1}x + ${n2}}{${d1}x - ${d2}}`]),
+                    exp: `<ol>
+                        <li><span class="keyword">Rumus Cepat Invers Pecahan:</span> Untuk $f(x) = \\frac{ax+b}{cx+d}$, inversnya adalah $f^{-1}(x) = \\frac{-dx+b}{cx-a}$.</li>
+                        <li><span class="keyword">Identifikasi:</span> $a=${a}, b=${b}, c=${c}, d=${d}$.</li>
+                        <li><span class="keyword">Substitusi:</span> $f^{-1}(x) = \\frac{-(${d})x + ${b}}{${c}x - ${a}} = \\frac{${n1}x + ${n2}}{${d1}x + ${d2}}$.</li>
+                        <li><span class="keyword">Verifikasi:</span> Cek dengan $f(f^{-1}(x))$ harus menghasilkan x.</li>
+                    </ol>`
+                });
+            });
+
+            // Q37-48: Grafik Fungsi Kuadrat
+            const quadP = [[1, -4, 3], [1, -2, -3], [1, 2, -8], [1, -6, 5], [1, 4, -5], [1, -8, 7], [1, 2, -15], [1, -10, 9], [1, 6, -7], [1, -12, 11], [1, 8, -9], [1, -14, 13]];
+            quadP.forEach(p => {
+                let a=p[0], b=p[1], c=p[2];
+                let vx = -b/(2*a), vy = c - (b*b)/(4*a);
+                let ans = `(${vx}, ${vy})`;
+                qs.push({ 
+                    cn: `求二次函数 $f(x) = ${a}x^2 ${b >= 0 ? '+' : '-'} ${Math.abs(b)}x ${c >= 0 ? '+' : '-'} ${Math.abs(c)}$ 的顶点坐标。`, 
+                    id: `Tentukan titik puncak dari $f(x) = ${a}x^2 ${b >= 0 ? '+' : '-'} ${Math.abs(b)}x ${c >= 0 ? '+' : '-'} ${Math.abs(c)}$.`, 
+                    ans: ans, 
+                    opts: shuffle([ans, `(${-vx}, ${vy})`, `(${vx}, ${-vy})`, `(${-vx}, ${-vy})`]),
+                    exp: `<ol>
+                        <li><span class="keyword">Rumus Titik Puncak:</span> Untuk $f(x) = ax^2 + bx + c$, puncak berada di $(x_p, y_p)$ dengan $x_p = \\frac{-b}{2a}$.</li>
+                        <li><span class="keyword">Hitung $x_p$:</span> $x_p = \\frac{-(${b})}{2(${a})} = ${vx}$.</li>
+                        <li><span class="keyword">Hitung $y_p$:</span> $y_p = f(${vx}) = ${vy}$ (atau gunakan rumus $y_p = c - \\frac{b^2}{4a}$).</li>
+                        <li><span class="keyword">Hasil:</span> Titik puncak adalah $(${vx}, ${vy})$. Karena $a > 0$, parabola terbuka ke atas sehingga puncak adalah titik minimum.</li>
+                    </ol>`
+                });
+            });
+            return qs;
+        }
+
+        // ==========================================
+        // MODULE 3: VEKTOR & GEOMETRI
+        // ==========================================
+        function genMod3() {
+            let qs = [];
+            
+            // Q1: Soal Khusus Hanzi
+            qs.push({ 
+                cn: `已知向量 $\\vec{a} = (1, 2, -2)$ 与 $\\vec{b} = (3, -2, 6)$，求 $\\vec{a}$ 与 $\\vec{b}$ 的夹角余弦值。`, 
+                id: `Diketahui $\\vec{a} = (1, 2, -2)$ dan $\\vec{b} = (3, -2, 6)$, tentukan cosinus sudut antara keduanya.`, 
+                ans: `-\\frac{13}{21}`, 
+                opts: fracOpts(-13, 21),
+                exp: `<ol>
+                    <li><span class="keyword">Rumus Cosinus Sudut:</span> $\\cos \\theta = \\frac{\\vec{a} \\cdot \\vec{b}}{|\\vec{a}| \\cdot |\\vec{b}|}$.</li>
+                    <li><span class="keyword">Hitung Dot Product:</span> $\\vec{a} \\cdot \\vec{b} = (1)(3) + (2)(-2) + (-2)(6) = 3 - 4 - 12 = -13$.</li>
+                    <li><span class="keyword">Hitung Panjang Vektor:</span> $|\\vec{a}| = \\sqrt{1^2 + 2^2 + (-2)^2} = \\sqrt{9} = 3$, $|\\vec{b}| = \\sqrt{3^2 + (-2)^2 + 6^2} = \\sqrt{49} = 7$.</li>
+                    <li><span class="keyword">Hasil:</span> $\\cos \\theta = \\frac{-13}{3 \\times 7} = -\\frac{13}{21}$. Nilai negatif berarti sudut tumpul (> 90°).</li>
+                </ol>`
+            });
+
+            // Q2-12: Transformasi Geometri (Translasi)
+            const transP = [[2, 3, 1, -1], [-1, 4, 2, 3], [3, -2, -1, 2], [4, 1, 3, -3], [-2, 5, 1, 4], [1, -3, 2, 1], [5, 2, -2, 3], [-3, 1, 4, -1], [2, 4, 1, 2], [4, -1, 3, 1], [-4, 3, 2, -2], [1, 5, -1, 3]];
+            transP.forEach(p => {
+                let x=p[0], y=p[1], tx=p[2], ty=p[3];
+                let ans = `(${x+tx}, ${y+ty})`;
+                qs.push({ 
+                    cn: `点 $(${x}, ${y})$ 按向量 $(${tx}, ${ty})$ 平移后的坐标是？`, 
+                    id: `Koordinat titik $(${x}, ${y})$ setelah ditranslasikan oleh vektor $(${tx}, ${ty})$ adalah?`, 
+                    ans: ans, 
+                    opts: shuffle([ans, `(${x-tx}, ${y-ty})`, `(${x+tx}, ${y-ty})`, `(${x-tx}, ${y+ty})`]),
+                    exp: `<ol>
+                        <li><span class="keyword">Konsep Translasi:</span> Translasi (pergeseran) oleh vektor $(t_x, t_y)$ memindahkan setiap titik dengan menambahkan komponen vektor ke koordinat titik.</li>
+                        <li><span class="keyword">Rumus:</span> $(x', y') = (x + t_x, y + t_y)$.</li>
+                        <li><span class="keyword">Hitung:</span> $x' = ${x} + (${tx}) = ${x+tx}$, $y' = ${y} + (${ty}) = ${y+ty}$.</li>
+                        <li><span class="keyword">Hasil:</span> Koordinat baru adalah $(${x+tx}, ${y+ty})$.</li>
+                    </ol>`
+                });
+            });
+
+            // Q13-24: Jarak Antar Titik
+            const distP = [[0,0, 3,4], [1,2, 4,6], [-1,3, 2,-1], [2,5, -1,1], [0,4, 3,0], [3,3, -1,-1], [1,1, 4,5], [-2,2, 1,6], [4,0, 0,3], [2,2, 5,6], [-3,1, 0,5], [1,4, 4,0]];
+            distP.forEach(p => {
+                let x1=p[0], y1=p[1], x2=p[2], y2=p[3];
+                let dx = x2-x1, dy = y2-y1;
+                let d2 = dx*dx + dy*dy;
+                let d = Math.sqrt(d2);
+                let ans = Number.isInteger(d) ? `${d}` : `\\sqrt{${d2}}`;
+                qs.push({ 
+                    cn: `求点 $(${x1}, ${y1})$ 到点 $(${x2}, ${y2})$ 的距离。`, 
+                    id: `Tentukan jarak antara titik $(${x1}, ${y1})$ dan $(${x2}, ${y2})$.`, 
+                    ans: ans, 
+                    opts: shuffle([ans, `\\sqrt{${d2 + 1}}`, `\\sqrt{${d2 - 1}}`, `${Math.round(d)+1}`]),
+                    exp: `<ol>
+                        <li><span class="keyword">Rumus Jarak Euclidean:</span> $d = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$ (berasal dari Teorema Pythagoras).</li>
+                        <li><span class="keyword">Hitung Selisih:</span> $\\Delta x = ${x2} - (${x1}) = ${dx}$, $\\Delta y = ${y2} - (${y1}) = ${dy}$.</li>
+                        <li><span class="keyword">Kuadratkan:</span> $\\Delta x^2 = ${dx*dx}$, $\\Delta y^2 = ${dy*dy}$.</li>
+                        <li><span class="keyword">Hasil:</span> $d = \\sqrt{${dx*dx} + ${dy*dy}} = \\sqrt{${d2}} = ${ans}$.</li>
+                    </ol>`
+                });
+            });
+
+            // Q25-36: Dot Product Vektor
+            const vecP = [[1,2, 3,-1], [2,-1, 4,3], [-1,3, 2,4], [3,4, -2,1], [2,5, 1,-3], [4,1, -1,2], [1,6, 3,-2], [5,2, -3,4], [2,3, 4,-1], [3,1, 2,5], [4,2, -2,3], [1,4, 5,-1]];
+            vecP.forEach(p => {
+                let x1=p[0], y1=p[1], x2=p[2], y2=p[3];
+                let dot = x1*x2 + y1*y2;
+                qs.push({ 
+                    cn: `已知 $\\vec{a} = (${x1}, ${y1})$， $\\vec{b} = (${x2}, ${y2})$，求 $\\vec{a} \\cdot \\vec{b}$。`, 
+                    id: `Diketahui $\\vec{a} = (${x1}, ${y1})$ dan $\\vec{b} = (${x2}, ${y2})$, tentukan $\\vec{a} \\cdot \\vec{b}$.`, 
+                    ans: `${dot}`, 
+                    opts: numOpts(dot),
+                    exp: `<ol>
+                        <li><span class="keyword">Rumus Dot Product:</span> $\\vec{a} \\cdot \\vec{b} = x_1 x_2 + y_1 y_2$ (kalikan komponen yang bersesuaian lalu jumlahkan).</li>
+                        <li><span class="keyword">Hitung:</span> $= (${x1})(${x2}) + (${y1})(${y2}) = ${x1*x2} + ${y1*y2} = ${dot}$.</li>
+                        <li><span class="keyword">Arti Geometris:</span> $\\vec{a} \\cdot \\vec{b} = |\\vec{a}||\\vec{b}|\\cos\\theta$. Jika hasilnya 0, kedua vektor tegak lurus.</li>
+                        <li><span class="keyword">Catatan:</span> Dot product menghasilkan <b>skalar</b> (bilangan), bukan vektor.</li>
+                    </ol>`
+                });
+            });
+
+            // Q37-48: Determinan Matriks 2x2
+            const matP = [[2,3, 1,4], [1,2, 3,1], [4,1, 2,3], [3,2, 1,5], [2,5, 3,1], [1,4, 2,3], [5,2, 3,4], [2,1, 4,3], [3,3, 1,2], [4,2, 1,5], [1,3, 5,2], [2,4, 3,1]];
+            matP.forEach(p => {
+                let a=p[0], b=p[1], c=p[2], d=p[3];
+                let det = a*d - b*c;
+                qs.push({ 
+                    cn: `求矩阵 $\\begin{pmatrix} ${a} & ${b} \\\\ ${c} & ${d} \\end{pmatrix}$ 的行列式。`, 
+                    id: `Tentukan determinan dari matriks $\\begin{pmatrix} ${a} & ${b} \\\\ ${c} & ${d} \\end{pmatrix}$.`, 
+                    ans: `${det}`, 
+                    opts: numOpts(det),
+                    exp: `<ol>
+                        <li><span class="keyword">Rumus Determinan 2x2:</span> Untuk matriks $\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$, determinan = $ad - bc$.</li>
+                        <li><span class="keyword">Ingat Pola:</span> "Kali silang diagonal utama dikurangi kali silang diagonal sekunder".</li>
+                        <li><span class="keyword">Hitung:</span> $= (${a})(${d}) - (${b})(${c}) = ${a*d} - ${b*c} = ${det}$.</li>
+                        <li><span class="keyword">Makna:</span> Jika det = 0, matriks singular (tidak punya invers). Jika det ≠ 0, matriks invertible.</li>
+                    </ol>`
+                });
+            });
+            return qs;
+        }
+
+        // ==========================================
+        // MODULE 4: PROBABILITAS & STATISTIK
+        // ==========================================
+        function genMod4() {
+            let qs = [];
+            
+            // Q1: Soal Khusus Hanzi
+            qs.push({ 
+                cn: `从 5 名男生和 3 名女生中选出 3 人参加比赛，包含至少一名女生的选法有多少种？`, 
+                id: `Dari 5 laki-laki dan 3 perempuan, dipilih 3 orang. Berapa banyak cara jika setidaknya ada 1 perempuan?`, 
+                ans: `46`, 
+                opts: numOpts(46),
+                exp: `<ol>
+                    <li><span class="keyword">Strategi Komplemen:</span> Hitung "total cara" dikurangi "cara tanpa perempuan" (3 laki-laki semua).</li>
+                    <li><span class="keyword">Total cara:</span> Memilih 3 dari 8 orang = $C(8,3) = \\frac{8!}{3!5!} = 56$ cara.</li>
+                    <li><span class="keyword">Cara tanpa perempuan:</span> Memilih 3 dari 5 laki-laki = $C(5,3) = \\frac{5!}{3!2!} = 10$ cara.</li>
+                    <li><span class="keyword">Hasil:</span> $56 - 10 = 46$ cara. Strategi komplemen sangat berguna untuk soal "setidaknya satu".</li>
+                </ol>`
+            });
+
+            // Q2-12: Mean (Rata-rata)
+            const meanP = [[2,4,6,8], [1,3,5,7], [10,20,30,40], [5,10,15,20], [3,6,9,12], [1,2,3,4], [11,13,15,17], [2,5,8,11], [4,8,12,16], [7,14,21,28], [1,5,9,13], [3,7,11,15]];
+            meanP.forEach(p => {
+                let sum = p.reduce((a,b)=>a+b, 0);
+                let mean = sum / p.length;
+                qs.push({ 
+                    cn: `求数据 ${p.join(', ')} 的平均数。`, 
+                    id: `Tentukan rata-rata (mean) dari data ${p.join(', ')}.`, 
+                    ans: `${mean}`, 
+                    opts: numOpts(mean),
+                    exp: `<ol>
+                        <li><span class="keyword">Rumus Rata-rata:</span> $\\bar{x} = \\frac{\\sum x_i}{n}$ (jumlah semua data dibagi banyaknya data).</li>
+                        <li><span class="keyword">Jumlahkan:</span> $${p.join(' + ')} = ${sum}$.</li>
+                        <li><span class="keyword">Bagi:</span> $\\bar{x} = \\frac{${sum}}{${p.length}} = ${mean}$.</li>
+                        <li><span class="keyword">Catatan:</span> Rata-rata sensitif terhadap nilai ekstrem (outlier). Untuk data dengan outlier, median lebih representatif.</li>
+                    </ol>`
+                });
+            });
+
+            // Q13-24: Varians
+            const varP = [[1,2,3], [2,4,6], [1,3,5], [3,6,9], [2,3,4], [4,5,6], [1,4,7], [5,10,15], [2,5,8], [3,4,5], [1,5,9], [2,6,10]];
+            varP.forEach(p => {
+                let mean = p.reduce((a,b)=>a+b, 0) / p.length;
+                let variance = p.reduce((sum, val) => sum + (val - mean)**2, 0) / p.length;
+                qs.push({ 
+                    cn: `求数据 ${p.join(', ')} 的方差。`, 
+                    id: `Tentukan varians dari data ${p.join(', ')}.`, 
+                    ans: `${variance}`, 
+                    opts: numOpts(variance),
+                    exp: `<ol>
+                        <li><span class="keyword">Rumus Varians:</span> $\\sigma^2 = \\frac{\\sum (x_i - \\bar{x})^2}{n}$ (rata-rata kuadrat selisih dari mean).</li>
+                        <li><span class="keyword">Hitung Mean:</span> $\\bar{x} = ${mean}$.</li>
+                        <li><span class="keyword">Hitung Selisih Kuadrat:</span> ${p.map(x => `(${x}-${mean})^2=${((x-mean)**2).toFixed(2)}`).join(', ')}.</li>
+                        <li><span class="keyword">Hasil:</span> $\\sigma^2 = \\frac{${p.reduce((s,v)=>s+(v-mean)**2,0).toFixed(2)}}{${p.length}} = ${variance}$.</li>
+                    </ol>`
+                });
+            });
+
+            // Q25-36: Kombinasi
+            const combP = [[5,2], [6,3], [7,2], [8,4], [10,3], [6,2], [9,3], [7,4], [8,2], [10,5], [5,3], [9,2]];
+            combP.forEach(p => {
+                let n=p[0], k=p[1];
+                let c = comb(n, k);
+                qs.push({ 
+                    cn: `从 ${n} 个人中选出 ${k} 个人，共有多少种选法？`, 
+                    id: `Dari ${n} orang, dipilih ${k} orang. Ada berapa banyak cara?`, 
+                    ans: `${c}`, 
+                    opts: numOpts(c),
+                    exp: `<ol>
+                        <li><span class="keyword">Konsep Kombinasi:</span> Kombinasi digunakan ketika <b>urutan tidak diperhatikan</b> (AB sama dengan BA).</li>
+                        <li><span class="keyword">Rumus:</span> $C(n,k) = \\binom{n}{k} = \\frac{n!}{k!(n-k)!}$.</li>
+                        <li><span class="keyword">Hitung:</span> $C(${n},${k}) = \\frac{${n}!}{${k}! \\cdot ${n-k}!} = ${c}$.</li>
+                        <li><span class="keyword">Contoh Sehari-hari:</span> Memilih tim, memilih makanan, undian - semua menggunakan kombinasi.</li>
+                    </ol>`
+                });
+            });
+
+            // Q37-48: Peluang
+            const probP = [[3,2, 'red'], [4,1, 'red'], [2,3, 'blue'], [5,5, 'red'], [1,4, 'blue'], [3,3, 'red'], [4,2, 'blue'], [2,2, 'red'], [5,1, 'blue'], [3,4, 'red'], [1,3, 'blue'], [4,4, 'red']];
+            probP.forEach(p => {
+                let r=p[0], b=p[1], target=p[2];
+                let total = r + b;
+                let targetCount = target === 'red' ? r : b;
+                let g = gcd(targetCount, total);
+                let ans = `\\frac{${targetCount/g}}{${total/g}}`;
+                qs.push({ 
+                    cn: `袋中有 ${r} 个红球和 ${b} 个蓝球。随机摸出一个，是${target === 'red' ? '红' : '蓝'}球的概率是？`, 
+                    id: `Terdapat ${r} bola merah dan ${b} bola biru. Peluang terambilnya bola ${target === 'red' ? 'merah' : 'biru'} adalah?`, 
+                    ans: ans, 
+                    opts: fracOpts(targetCount, total),
+                    exp: `<ol>
+                        <li><span class="keyword">Rumus Peluang:</span> $P(A) = \\frac{n(A)}{n(S)}$ = (banyak kejadian yang diinginkan) / (total kemungkinan).</li>
+                        <li><span class="keyword">Total Bola:</span> $n(S) = ${r} + ${b} = ${total}$ bola.</li>
+                        <li><span class="keyword">Bola ${target === 'red' ? 'Merah' : 'Biru'}:</span> $n(A) = ${targetCount}$.</li>
+                        <li><span class="keyword">Hasil:</span> $P = \\frac{${targetCount}}{${total}} = ${ans}$. Peluang selalu antara 0 dan 1.</li>
+                    </ol>`
+                });
+            });
+            return qs;
+        }
+
+        // ==========================================
+        // APP STATE & LOGIC
+        // ==========================================
+        let currentModule = null, questions = [], currentIndex = 0, score = 0;
+        const moduleBtns = document.querySelectorAll('.module-btn');
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const quizArea = document.getElementById('quizArea');
+        const questionText = document.getElementById('questionText');
+        const questionTranslation = document.getElementById('questionTranslation');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const progressDisplay = document.getElementById('progressDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const explanationBox = document.getElementById('explanationBox');
+        const explanationContent = document.getElementById('explanationContent');
+
+        moduleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (currentModule && currentIndex > 0 && currentIndex < 48) {
+                    if (!confirm('Anda sedang mengerjakan modul. Yakin ingin beralih? Progress akan hilang.')) return;
+                }
+                moduleBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentModule = btn.dataset.module;
+                startModule();
+            });
+        });
+
+        function startModule() {
+            welcomeScreen.style.display = 'none';
+            quizArea.style.display = 'flex';
+            switch(currentModule) {
+                case '1': questions = genMod1(); break;
+                case '2': questions = genMod2(); break;
+                case '3': questions = genMod3(); break;
+                case '4': questions = genMod4(); break;
+            }
+            currentIndex = 0; score = 0;
+            scoreDisplay.textContent = `⭐ Skor: 0`;
+            startTimer();
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            if (currentIndex >= 48) { showCompletion(false); return; }
+            const q = questions[currentIndex];
+            questionText.innerHTML = q.cn;
+            questionTranslation.innerHTML = `Terjemahan: ${q.id}`;
+            optionsContainer.innerHTML = '';
+            explanationBox.classList.remove('show');
+            const labels = ['A', 'B', 'C', 'D'];
+            q.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-label">${labels[idx]}</span> <span>$${opt}$</span>`;
+                btn.addEventListener('click', () => handleAnswer(btn, opt, q));
+                optionsContainer.appendChild(btn);
+            });
+            nextBtn.classList.remove('show');
+            progressDisplay.textContent = `Soal: ${currentIndex + 1} / 48`;
+            progressBar.style.width = `${((currentIndex) / 48) * 100}%`;
+            renderMath();
+            const card = document.getElementById('questionCard');
+            card.style.animation = 'none'; card.offsetHeight; card.style.animation = 'slideIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)';
+        }
+
+        function handleAnswer(btn, selected, q) {
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.disabled = true);
+            if (String(selected).trim() === String(q.ans).trim()) {
+                btn.classList.add('correct'); score += 10;
+                scoreDisplay.textContent = `⭐ Skor: ${score}`;
+            } else {
+                btn.classList.add('wrong');
+                allBtns.forEach(b => {
+                    let val = b.querySelector('span:last-child').textContent.trim();
+                    if (val === `$${q.ans}$` || val === q.ans) b.classList.add('correct');
+                });
+            }
+            explanationContent.innerHTML = q.exp;
+            explanationBox.classList.add('show');
+            nextBtn.classList.add('show');
+            renderMath();
+        }
+
+        nextBtn.addEventListener('click', () => { currentIndex++; renderQuestion(); });
+
+        function showCompletion(timeUp) {
+            if (timerInterval) clearInterval(timerInterval);
+            progressBar.style.width = '100%'; progressDisplay.textContent = `Selesai!`;
+            if (timeUp) {
+                questionText.innerHTML = `⏰ Waktu Habis! Anda telah menyelesaikan ${currentIndex} dari 48 soal.`;
+            } else {
+                questionText.innerHTML = `🎉 Selamat! Anda telah menyelesaikan Modul ${currentModule}!`;
+            }
+            questionTranslation.innerHTML = `Skor akhir Anda: <b>${score} / 480</b> dari ${currentIndex} soal yang dijawab. Latihan yang hebat!`;
+            optionsContainer.innerHTML = ''; 
+            explanationBox.classList.remove('show');
+            nextBtn.classList.remove('show');
+            renderMath(); 
+            launchConfetti();
+        }
+
+        function launchConfetti() {
+            const colors = ['#ff7675', '#fdcb6e', '#00b894', '#0984e3', '#6c5ce7'];
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 4000);
+            }
+        }
+    </script>
+</body>
+</html>
